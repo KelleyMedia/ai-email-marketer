@@ -66,32 +66,34 @@ export default function EmailMarketer() {
   };
 
   const generateResponse = async () => {
-    setLoading(true);
-    setEmailOutput("");
+  setLoading(true);
+  setEmailOutput("");
 
-    const prompt = `You are an email responder. Here's the email you received:
+  const prompt = `You are an email responder. Here's the email you received:
 
-    "${receivedEmail}"
+  "${receivedEmail}"
 
-    How would you respond to this email in a ${responseTone} tone?
-    Here are some details to consider:
-    "${responseDetails}"
-    Please provide a clear and concise response.`;
+  Respond to this email in a ${responseTone} tone. Include context: ${responseDetails}`;
 
-    try {
-      const response = await fetch("/api/generate-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt }),
-      });
-      const data = await response.json();
-      setEmailOutput(data.email);
-    } catch (error) {
-      setEmailOutput("Error generating response. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    const response = await fetch("/api/generate-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt }),
+    });
+    const data = await response.json();
+    const subject = extractSubject(receivedEmail) || "Response Email";
+
+    setEmailOutput(data.email);
+    setSavedEmails([...savedEmails, { subject, content: data.email }]);
+    setSelectedEmail({ subject, content: data.email });
+  } catch (error) {
+    setEmailOutput("Error generating response. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="flex h-screen bg-gray-50 flex-col">
