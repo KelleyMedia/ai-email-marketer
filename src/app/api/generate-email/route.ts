@@ -1,19 +1,15 @@
-// app/api/generate-email/route.ts
-
-export const runtime = "nodejs"; // Ensures this runs in the correct Next.js environment
+export const runtime = "nodejs";
 
 export async function POST(req: Request) {
-  console.log("Received POST request at /api/generate-email");
 
   const { prompt } = await req.json();
-  console.log("Received prompt:", prompt);
 
   try {
     const response = await fetch("https://api.together.xyz/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.TOGETHER_API_KEY}`, // store securely in .env.local
+        Authorization: `Bearer ${process.env.TOGETHER_API_KEY}`,
       },
       body: JSON.stringify({
         model: "mistralai/Mixtral-8x7B-Instruct-v0.1",
@@ -32,10 +28,8 @@ export async function POST(req: Request) {
     });
 
     const data = await response.json();
-    console.log("Response from Together AI:", data);
 
     if (data.error) {
-      console.error("Together AI error:", data.error);
       return new Response(JSON.stringify({ error: data.error.message }), {
         status: 500,
       });
